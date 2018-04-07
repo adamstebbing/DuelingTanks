@@ -28,19 +28,18 @@ DigitalIn pb_r(p22);                        // Right Button
 DigitalIn pb_d(p23);                        // Down Button
 DigitalIn pb_l(p24);                        // Left Button
 
-Serial pc(USBTX, USBRX);                    // Serial connection to PC. Useful for debugging!
+Serial pc(USBTX, USBRX);                    // Serial connection to PC for debugging
 MMA8452 acc(p28, p27, 100000);              // Accelerometer (SDA, SCL, Baudrate)
 uLCD_4DGL uLCD(p9,p10,p11);                 // LCD (tx, rx, reset)
-SDFileSystem sd(p5, p6, p7, p8, "sd");      // SD  (mosi, miso, sck, cs)
-AnalogOut DACout(p18);                      // speaker
-wave_player player(&DACout);                // wav player
-Game_Synchronizer sync(PLAYER1);            // Game_Synchronizer (PLAYER)
+SDFileSystem sd(p5, p6, p7, p8, "sd");      // SD (mosi, miso, sck, cs)
+AnalogOut DACout(p18);                      // Speaker
+wave_player player(&DACout);                // Wave player
+Game_Synchronizer sync(PLAYER1);            // Game_Synchronizer
 Timer frame_timer;                          // Timer
 
-RGBLed rgb(p26, p25);                           // RGBLed
+RGBLed rgb(p26, p25);                       // RGBLed
 
-// Global variables go here.
-
+// Global variables
 int winner = -1;
 int whose_turn = PLAYER1;
 int map = 1;
@@ -52,21 +51,13 @@ int t2kill = 0;
 char temp;
 int type = 1;
 
-// Ask the user whether to run the game in Single- or Multi-Player mode.
-// Note that this function uses uLCD instead of sync because it is only
-// writing to the local (Player1) lcd. Sync hasn't been initialized yet,
-// so you can't use it anyway. For the same reason, you must access
-// the buttons directly e.g. if( !pb_r ) { do something; }.
-
-
-// return MULTI_PLAYER if the user selects multi-player.
-// return SINGLE_PLAYER if the user selects single-player.
+// Return MULTI_PLAYER if the user selects multi-player.
+// Return SINGLE_PLAYER if the user selects single-player.
 int game_menu(void) {
 
     uLCD.baudrate(BAUD_3000000);
 
-    // the locate command tells the screen where to place the text.
-    uLCD.locate(0,0);
+    uLCD.locate(0,0); //Locate tells the MBED where to place the text
     uLCD.puts("Choose a mode:");
     uLCD.locate(2,2);
     uLCD.puts("Single-Player:");
@@ -96,7 +87,8 @@ int game_menu(void) {
     temp = t2kill + '0';
     uLCD.putc(temp);
 
-    while(1) {
+    //Run game menu until a button is pressed
+    while(1) { 
         if (!pb_u) {
             uLCD.locate(1,9);
             if (tankColors == 3) {
@@ -138,21 +130,16 @@ int game_menu(void) {
     }
 }
 
-// Initialize the world map. I've provided a basic map here,
-// but as part of the assignment you must create more
-// interesting map(s).
-// Note that calls to sync.function() will run function()
-// on both players' LCDs (assuming you are in multiplayer mode).
-// In single player mode, only your lcd will be modified. (Makes sense, right?)
+// Initialize the world map
 void map_init() {
-    // Fill the entire screen with sky blue.
+    // Fill the entire screen with sky blue
     sync.background_color(SKY_COLOR);
 
     // Call the clear screen function to force the LCD to redraw the screen
-    // with the new background color.
+    // with the new background color
     sync.cls();
 
-    // Draw the ground in green.
+    // Draw the ground in green
     sync.filled_rectangle(0,0,128,20, GND_COLOR);
     for (int x = 3; x > 0; x--) {
         sync.filled_circle(70 + x*10, 125, 3, t1color);
@@ -163,7 +150,7 @@ void map_init() {
 
     rgb.write(TANK_RED);
 
-    // Draw obstacles and background.
+    // Draw obstacles and background
     if (map == 1) {
         sync.triangle(44, 60, 84, 60, 64, 90, BLACK);
         sync.filled_circle(65, 72, 5, WHITE);
@@ -245,9 +232,9 @@ void map_init() {
     playSound("/sd/wavfiles/gamestart.wav");
 }
 
-// Initialize the game hardware.
+// Initialize the game hardware
 // Call game_menu to find out which mode to play the game in (Single- or Multi-Player)
-// Initialize the game synchronizer.
+// Initialize the game synchronizer
 void game_init(void) {
 
     led1 = 0; led2 = 0; led3 = 0; led4 = 0;
